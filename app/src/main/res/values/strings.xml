@@ -2,4 +2,6 @@
     <string name="app_name">android_perona</string>
     <string name="a">A</string>
     <string name="b">B</string>
+    <string name="welcome_back">歡迎回來</string>
+    <string name="api_error">取得資料錯誤</string>
 </resources>

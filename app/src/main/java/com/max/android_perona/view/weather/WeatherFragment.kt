@@ -3,8 +3,11 @@ package com.max.android_perona.view.weather
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
+import android.widget.Toast
+import androidx.core.view.isVisible
 import com.max.android_perona.R
 import com.max.android_perona.databinding.FragmentWeatherBinding
+import com.max.android_perona.model.service.util.LoadApiStatus
 import com.max.android_perona.view.detail.DetailTemperature
 import com.max.android_perona.view.detail.DetailTemperatureActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -46,28 +49,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         _binding = FragmentWeatherBinding.bind(view)
 
         initRecyclerView()
-
-        val mockData = listOf(
-            WeatherItem.Temperature(
-                "2021-12-05 06:00:00",
-                "2021-12-05 18:00:00",
-                "27",
-                "C"
-            ),
-            WeatherItem.Picture(
-                R.drawable.ic_launcher_background
-            ),
-            WeatherItem.Temperature(
-                "2021-12-05 18:00:00",
-                "2021-12-06 06:00:00",
-                "28",
-                "C"
-            ),
-            WeatherItem.Picture(
-                R.drawable.ic_launcher_background
-            )
-        )
-        weatherAdapter.submitList(mockData)
+        observeViewModel()
     }
 
     override fun onDestroyView() {
@@ -77,5 +59,29 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     private fun initRecyclerView() {
         binding.recyclerViewWeather.adapter = weatherAdapter
+    }
+
+    private fun observeViewModel() {
+        viewModel.items.observe(viewLifecycleOwner, {
+            it?.let { items ->
+                weatherAdapter.submitList(items)
+            }
+        })
+        viewModel.loadApiStatus.observe(viewLifecycleOwner, {
+            it?.let { status ->
+                when (status) {
+                    LoadApiStatus.LOADING -> {
+                        binding.progressBar.isVisible = true
+                    }
+                    LoadApiStatus.DONE -> {
+                        binding.progressBar.isVisible = false
+                    }
+                    LoadApiStatus.ERROR -> {
+                        binding.progressBar.isVisible = false
+                        Toast.makeText(requireContext(), getString(R.string.api_error), Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        })
     }
 }
